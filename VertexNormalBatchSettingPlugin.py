@@ -6,6 +6,7 @@ from bpy.props import FloatVectorProperty
 from bpy.types import Operator, Panel
 from mathutils import Vector
 
+
 languages = {
     'en_US': {
          "Vertex Normal Batch Setting Plugin": "Vertex Normal Batch Setting Plugin",
@@ -21,7 +22,7 @@ languages = {
     }
 }
 
-lang = 'en_US'
+lang_code = 'en_US'
 
 bl_info = {
     "name": "Set Vertex Normals",
@@ -35,7 +36,9 @@ bl_info = {
 
 def detect_system_language():
     default_locale = locale.getdefaultlocale()
-    return default_locale[0]
+    if(default_locale[0] in languages.keys()):
+        return default_locale[0]
+    return "en_US"
 
 
 class OBJECT_OT_SetVertexNormals(Operator):
@@ -44,7 +47,7 @@ class OBJECT_OT_SetVertexNormals(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        global lang
+        global lang_code
         # 获取目标法线向量
         target_normal = Vector(context.scene.target_normal).normalized()
         
@@ -52,7 +55,7 @@ class OBJECT_OT_SetVertexNormals(Operator):
         selected_meshes = [obj for obj in context.selected_objects if obj.type == 'MESH']
         
         if not selected_meshes:
-            self.report({'ERROR'}, languages[lang]["LoongLy:No mesh objects selected"])
+            self.report({'ERROR'}, languages[lang_code]["LoongLy:No mesh objects selected"])
             return {'CANCELLED'}
 
         for obj in selected_meshes:
@@ -69,7 +72,7 @@ class OBJECT_OT_SetVertexNormals(Operator):
             bmesh.update_edit_mesh(obj.data)
             # bpy.ops.object.mode_set(mode=obj_mode)
 
-        self.report({'INFO'}, languages[lang]["LoongLy:Vertex normals set to"]+f" {target_normal}")
+        self.report({'INFO'}, languages[lang_code]["LoongLy:Vertex normals set to"]+f" {target_normal}")
         return {'FINISHED'}
 
 
@@ -80,7 +83,7 @@ class VIEW3D_PT_NormalSetter(Panel):
     bl_category = 'Tool'
 
     def draw(self, context):
-        global lang
+        global lang_code
         layout = self.layout
         scene = context.scene
         
@@ -88,12 +91,12 @@ class VIEW3D_PT_NormalSetter(Panel):
         layout.prop(scene, "target_normal", text="normal")
         
         # 应用按钮
-        layout.operator("object.set_vertex_normals", text=languages[lang]["Apply Normals"] , icon='NORMALS_VERTEX')
+        layout.operator("object.set_vertex_normals", text=languages[lang_code]["Apply Normals"] , icon='NORMALS_VERTEX')
 
 
 def register():
-    global lang
-    lang = detect_system_language()
+    global lang_code
+    lang_code = detect_system_language()
     bpy.utils.register_class(OBJECT_OT_SetVertexNormals)
     bpy.utils.register_class(VIEW3D_PT_NormalSetter)
     bpy.types.Scene.target_normal = FloatVectorProperty(
