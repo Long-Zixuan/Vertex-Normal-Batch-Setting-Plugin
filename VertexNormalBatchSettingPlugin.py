@@ -112,4 +112,7 @@ def unregister():
 
 
 if __name__ == "__main__":
-    register()
+    register() 
+
+
+#LZX-VSCode-2025-05-21-005
