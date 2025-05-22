@@ -27,7 +27,7 @@ bl_info = {
     "name": "Set Vertex Normals",
     "author": "LoongLy Software",
     "version": (2, 0),
-    "blender": (3, 5, 0),
+    "blender": (4, 2, 0),
     "location": "View3D > UI > Tool",
     "description": "Set vertex normals to a specified vector",
     "category": "Object",
@@ -64,7 +64,8 @@ class OBJECT_OT_SetVertexNormals(Operator):
             mesh = obj.data
 
             # 确保启用自定义法线支持
-            mesh.use_auto_smooth = True
+           # mesh.use_auto_smooth = True #4.2不支持
+            bpy.ops.object.shade_smooth()
 
             # 创建一个与loop数量相同的法线列表
             normals = [target_normal for loop in mesh.loops]
