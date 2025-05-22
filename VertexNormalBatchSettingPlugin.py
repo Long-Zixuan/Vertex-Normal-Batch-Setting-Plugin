@@ -27,7 +27,7 @@ lang_code = 'en_US'
 bl_info = {
     "name": "Set Vertex Normals",
     "author": "LoongLy Software",
-    "version": (1, 0),
+    "version": (2, 0),
     "blender": (3, 5, 0),
     "location": "View3D > UI > Tool",
     "description": "Set vertex normals to a specified vector",
@@ -39,6 +39,7 @@ def detect_system_language():
     if(default_locale[0] in languages.keys()):
         return default_locale[0]
     return "en_US"
+
 
 
 class OBJECT_OT_SetVertexNormals(Operator):
@@ -59,17 +60,43 @@ class OBJECT_OT_SetVertexNormals(Operator):
             return {'CANCELLED'}
 
         for obj in selected_meshes:
-            # 确保处于编辑模式
             obj_mode = obj.mode
-            if obj.mode != 'EDIT':
+            bpy.ops.object.mode_set(mode='OBJECT')
+            mesh = obj.data
+
+            # 确保启用自定义法线支持
+            mesh.use_auto_smooth = True
+
+            # 创建一个与loop数量相同的法线列表
+            normals = [target_normal for loop in mesh.loops]
+
+            # 设置自定义法线
+            mesh.normals_split_custom_set(normals)
+
+            # 更新网格以应用更改
+            mesh.update()
+            #以下代码仅为了让第一次在编辑模式启动该脚本的时候显示正确的法线，第二次进入编辑模式将无法正确显示法相
+             # 确保处于编辑模式
+            if obj_mode == 'EDIT':
                 bpy.ops.object.mode_set(mode='EDIT')
 
-            mesh = bmesh.from_edit_mesh(obj.data)
+                #mesh = bmesh.new()
+                #mesh.from_mesh(obj.data)
 
-            for v in mesh.verts:
-                v.normal = target_normal
+                mesh = bmesh.from_edit_mesh(obj.data)
 
-            bmesh.update_edit_mesh(obj.data)
+                for v in mesh.verts:
+                    v.normal = target_normal
+
+                #for f in mesh.faces:
+                #    f.normal = target_normal
+
+                bmesh.update_edit_mesh(obj.data)
+                #mesh.to_mesh(obj.data)
+                mesh.free()
+            bpy.context.view_layer.update()
+            bpy.ops.object.mode_set(mode=obj_mode)
+
             # bpy.ops.object.mode_set(mode=obj_mode)
 
         self.report({'INFO'}, languages[lang_code]["LoongLy:Vertex normals set to"]+f" {target_normal}")
@@ -118,4 +145,4 @@ if __name__ == "__main__":
     register() 
 
 
-#LZX-VSCode-2025-05-21-005
+#LZX-Pycharm2021.3-2025-05-22-001
