@@ -1,3 +1,4 @@
+![LoongLy Software](https://gitee.com/zixuan_long/Img/raw/master/LS3_LOW_PIX.png)
 # 顶点法线批量设置插件
 
 可以批量设置所选物体的顶点法线
